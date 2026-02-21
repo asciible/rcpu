@@ -1,0 +1,185 @@
+(defcfg
+
+	process-unmapped-keys yes
+
+)
+
+(defvar
+
+	tap_time    400
+	hold_time   400
+	short_pause 20
+	'           KEY_APOSTROPHE
+)
+
+(defalias
+
+	#| Common Aliases |#
+
+	control lctl
+	meta 	lmet
+	alt	    lalt
+	shift	lsft
+
+	enter 	ret
+	escape	esc
+	space	spc
+
+
+	#| Home Row Modifiers |#
+
+	a_C      (tap-hold-release $tap_time $hold_time   a  lctl)
+	s_M      (tap-hold-release $tap_time $hold_time   s  lmet)
+	d_A      (tap-hold-release $tap_time $hold_time   d  lalt)
+	f_S      (tap-hold-release $tap_time $hold_time   f  lsft)
+	j_S      (tap-hold-release $tap_time $hold_time   j  lsft)
+	k_A      (tap-hold-release $tap_time $hold_time   k  lalt)
+	l_M      (tap-hold-release $tap_time $hold_time   l  lmet)
+	;_C      (tap-hold-release $tap_time $hold_time   ;  lctl)
+
+	#| Layer Togglers |#
+
+	navigation_L (layer-toggle navigation)
+	symbols_L    (layer-toggle symbols)
+	media_L      (layer-toggle media)
+	source_L     (layer-switch source)
+	main_L       (layer-switch main)
+	numbers_L    (layer-toggle numbers)
+
+	#| Main Layer Tap-Hold Togglers |#
+
+	spc_navi   (tap-hold-release $tap_time  $hold_time  spc  @navigation_L)
+	i_symb     (tap-hold-release $tap_time  $hold_time  i    @symbols_L)
+	e_symb     (tap-hold-release $tap_time  $hold_time  e    @symbols_L)
+	v_num      (tap-hold-release $tap_time  $hold_time  v    @numbers_L)
+	w_num      (tap-hold-release $tap_time  $hold_time  w    @numbers_L)
+	esc_medi   (tap-hold-release $tap_time  $hold_time  esc  @media_L)
+
+	#| Navigation Components |#
+
+	go_back    (multi lctl [)
+	go_forw    (multi lctl ])
+	zoom_in    (multi lctl =)
+	zoom_out   (multi lctl -)
+	word_bac   (multi lalt left)
+	word_nex   (multi lalt right)
+	word_del   (multi lalt del)
+	word_bsp   (multi lalt bspc)
+	copy       (multi @meta c)
+	paste      (multi @meta v)
+	sel_all    (multi @meta a)
+	copy_all   (multi @sel_all @copy)
+	vim_save   (macro esc $short_pause S-; $short_pause w $short_pause enter)
+
+	#| Media Controls |#
+
+	med_nex MediaTrackNext
+	med_pre MediaTrackPrevious
+	>song MediaTrackNext
+	<song MediaTrackPrevious
+	med_pp  MediaPlayPause
+
+	#| Symbols |#
+
+        {	S-[
+        }	S-]
+	lp 	S-9
+	rp 	S-0
+	|	S-\
+	%   S-5
+	colon S-;
+
+	#| Symbols Sequences |#
+
+	0_index (macro [ Digit0 ])
+	p_pair_: (macro @lp @rp @colon enter)
+
+)
+
+(defsrc
+
+  IntlBackslash   1         2         3         4         5         6         7         8         9         0         -         =         bspc
+
+	tab       q         w         e         r         t         y         u         i         o         p         [         ]         enter
+	caps      a         s         d         f         g         h         j         k         l         ;         '         \
+	lsft      Backquote z         x         c         v         b         n         m         ,         .         /                   rsft
+
+		  lctl   lalt       lmet                           spc                            rmet       ralt
+
+
+)
+
+(deflayer main
+
+	lrld      1         2         3         4         5         6         7         8         9         0         -         @source_L XX
+
+	tab       q         @w_num    @e_symb   r         t         y         u         @i_symb   o         p         bspc      XX        XX
+	@esc_medi @a_C      @s_M      @d_A      @f_S      g         h         @j_S      @k_A      @l_M      @;_C      '         XX
+	lsft      lsgt      z         x         c         @v_num    b         n         m         ,         .         /                   rsft
+
+		  lctl      lalt      enter                     @spc_navi                         enter    ralt
+
+)
+
+(deflayer source
+
+    IntlBackslash 1         2         3         4         5         6         7         8         9         0         -         @main_L   bspc
+
+	tab       q         w         e         r         t         y         u         i         o         p         [         ]         enter
+	caps      a         s         d         f         g         h         j         k         l         ;         '         \
+	lsft      Backquote z         x         c         v         b         n         m         ,         .         /                   rsft
+
+		  lctl   lalt         enter                        spc                            rmet       ralt
+
+
+)
+
+(deflayer navigation
+
+	grv       1         2         3         4         5         6         7         @zoom_out @zoom_in  0         -         =         bspc
+
+	@copy_all q         @word_nex e         del       t         y         bspc      home      end       p         [         ]         enter
+	caps      @copy_all @word_bsp @word_del del       g         left      down      up        right     enter     @vim_save \
+	lsft      lsgt      z         x         @copy     @paste    @word_bac n         m         @go_back  @go_forw  /                   rsft
+
+		  lctl   lalt         enter                        spc                            rmet       ralt
+
+)
+
+(deflayer symbols
+
+	grv       1         2         3         4         5         6         7         8         9         0         -         =         bspc
+
+	0         S-6       [         ]         S-4       t         y         u         S-8       \         p         [         ]         enter
+	S-2       @{        @lp       @rp       @}        g         @|        S--       -         S-=       =         '         \
+	lsft      lsgt      z         S-,       S-.       v         b         S-3       m         ,         .         @%                  rsft
+
+                  lctl   lalt         enter                        spc                            rmet       ralt
+
+)
+
+
+(deflayer media
+
+	grv       1         2         3         4         5         6         7         8         9         0         -         =         bspc
+
+	tab       q         w         e         r         t         y         u         brdwn     brup      @med_pp   [         ]         enter
+	XX        a         s         d         f         g         @med_pre  vold      volu      @med_nex  '         '         \
+	lsft      lsgt      z         x         c         v         b         n         mute      ,         .         /                   rsft
+
+		  lctl   lalt         enter                        pp                            rmet       ralt
+
+)
+
+( deflayer numbers
+
+IntlBackslash   1         2         3         4         5         6         7         8         9         0         -         =         bspc
+
+	tab       q         w         e         r         t         y         7         8         9         @0_index  bspc      ]         enter
+	caps      a         s         d         f         g         h         4         5         6         0       '         \
+	lsft      Backquote z         x         c         v         b         0         1         2         3         /                   rsft
+
+		  lctl   lalt         enter                        spc                            rmet       ralt
+
+
+)
