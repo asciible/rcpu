@@ -1,41 +1,54 @@
+#| Kanata |#
+#| Macbook Pro - ISO Keyboard [CH] |#
+
 (defcfg
 
 	process-unmapped-keys yes
+	danger-enable-cmd yes
+	concurrent-tap-hold yes
 
 )
 
 (defvar
 
-	tap_time    400
-	hold_time   400
-	short_pause 20
+	tap_time    100
+	hold_time   200
+	P           10
 	'           KEY_APOSTROPHE
+	`	        Backquote
+	Dquote	    S-'
 )
 
 (defalias
 
 	#| Common Aliases |#
 
-	control lctl
 	meta 	lmet
-	alt	    lalt
-	shift	lsft
+	ultra	(multi lctl lalt lmet)
 
 	enter 	ret
 	escape	esc
 	space	spc
 
+	ultra_L (layer-toggle ultra)
 
-	#| Home Row Modifiers |#
+	#| Home Row |#
 
+	#| Left Hand |#
 	a_C      (tap-hold-release $tap_time $hold_time   a  lctl)
-	s_M      (tap-hold-release $tap_time $hold_time   s  lmet)
+	s_U      (tap-hold-release $tap_time $hold_time   s  @ultra)
 	d_A      (tap-hold-release $tap_time $hold_time   d  lalt)
 	f_S      (tap-hold-release $tap_time $hold_time   f  lsft)
+
+	w_M      (tap-hold-release $tap_time $hold_time   w  @meta)
+
+	#| Right Hand |#
 	j_S      (tap-hold-release $tap_time $hold_time   j  lsft)
 	k_A      (tap-hold-release $tap_time $hold_time   k  lalt)
-	l_M      (tap-hold-release $tap_time $hold_time   l  lmet)
+	l_U      (tap-hold-release $tap_time $hold_time   l  @ultra)
 	;_C      (tap-hold-release $tap_time $hold_time   ;  lctl)
+
+	o_M      (tap-hold-release $tap_time $hold_time   o  @meta)
 
 	#| Layer Togglers |#
 
@@ -45,6 +58,7 @@
 	source_L     (layer-switch source)
 	main_L       (layer-switch main)
 	numbers_L    (layer-toggle numbers)
+	numbers_flat (layer-toggle numbers_flat)
 
 	#| Main Layer Tap-Hold Togglers |#
 
@@ -54,6 +68,9 @@
 	v_num      (tap-hold-release $tap_time  $hold_time  v    @numbers_L)
 	w_num      (tap-hold-release $tap_time  $hold_time  w    @numbers_L)
 	esc_medi   (tap-hold-release $tap_time  $hold_time  esc  @media_L)
+	ret_ultra  (tap-hold-release $tap_time  $hold_time  ret  @ultra_L)
+	ret_numb   (tap-hold-release $tap_time  $hold_time  ret  @ultra_L)
+	tab_lead   (tap-hold-release $tap_time  $hold_time  tab  (layer-toggle leader) )
 
 	#| Navigation Components |#
 
@@ -69,25 +86,35 @@
 	paste      (multi @meta v)
 	sel_all    (multi @meta a)
 	copy_all   (multi @sel_all @copy)
-	vim_save   (macro esc $short_pause S-; $short_pause w $short_pause enter)
+	del_all    (macro M-a $P del)
+
+	#| backspace wrapper (fast alternation with repeat key) |#
+	wbspc      (macro bspc)
+
+	#| vim |#
+
+	vim_save (macro esc $P S-; $P w $P enter)
+	vim_zq   (macro esc $P S-z S-q)
+	vim_zz   (macro esc $P S-z S-z)
+	to_line  (macro g g)
 
 	#| Media Controls |#
 
 	med_nex MediaTrackNext
 	med_pre MediaTrackPrevious
-	>song MediaTrackNext
-	<song MediaTrackPrevious
+	>song   MediaTrackNext
+	<song   MediaTrackPrevious
 	med_pp  MediaPlayPause
 
 	#| Symbols |#
 
-        {	S-[
-        }	S-]
+	{	S-[
+	}	S-]
 	lp 	S-9
 	rp 	S-0
 	|	S-\
-	%   S-5
-	colon S-;
+	%	S-5
+	colon	S-;
 
 	#| Symbols Sequences |#
 
@@ -98,32 +125,37 @@
 
 (defsrc
 
-  IntlBackslash   1         2         3         4         5         6         7         8         9         0         -         =         bspc
+IntlBackslash 1         2         3         4         5         6         7         8         9         0         -         =         bspc
 
 	tab       q         w         e         r         t         y         u         i         o         p         [         ]         enter
 	caps      a         s         d         f         g         h         j         k         l         ;         '         \
-	lsft      Backquote z         x         c         v         b         n         m         ,         .         /                   rsft
+	lsft      `         z         x         c         v         b         n         m         ,         .         /                   rsft
 
-		  lctl   lalt       lmet                           spc                            rmet       ralt
+		  lctl   lalt       lmet                               spc                            rmet       ralt
 
 
+)
+
+(defchordsv2
+  (s d) (layer-toggle navigation) 50 first-release ()
+  (w f) (layer-toggle edit) 50 first-release ()
 )
 
 (deflayer main
 
 	lrld      1         2         3         4         5         6         7         8         9         0         -         @source_L XX
 
-	tab       q         @w_num    @e_symb   r         t         y         u         @i_symb   o         p         bspc      XX        XX
-	@esc_medi @a_C      @s_M      @d_A      @f_S      g         h         @j_S      @k_A      @l_M      @;_C      '         XX
-	lsft      lsgt      z         x         c         @v_num    b         n         m         ,         .         /                   rsft
+	@tab_lead q         @w_M      @e_symb   r         t         y         u         @i_symb   @o_M      p         bspc      XX        XX
+	@esc_medi @a_C      @s_U      @d_A      @f_S      g         h         @j_S      @k_A      @l_U      @;_C      '         ret
+	lsft      Backquote z         x         c         @v_num    b         n         m         ,         .         /                   rsft
 
-		  lctl      lalt      enter                     @spc_navi                         enter    ralt
+		  sldr      lalt      @ret_ultra                @spc_navi                         @numbers_flat ralt
 
 )
 
 (deflayer source
 
-    IntlBackslash 1         2         3         4         5         6         7         8         9         0         -         @main_L   bspc
+IntlBackslash 1         2         3         4         5         6         7         8         9         0         -         @main_L   bspc
 
 	tab       q         w         e         r         t         y         u         i         o         p         [         ]         enter
 	caps      a         s         d         f         g         h         j         k         l         ;         '         \
@@ -134,15 +166,52 @@
 
 )
 
+(defalias
+
+	#| Workspaces Focus |#
+
+	agent    (multi @ultra a)
+	browser  (multi @ultra w)
+	terminal (multi @ultra ;)
+	notes    (multi @ultra o)
+	code     (multi @ultra c)
+	next     (multi @ultra j)
+	config   (multi @ultra r)
+	music    (multi @ultra m)
+	git      (multi @ultra g)
+	reload_rc (multi @ultra 1)
+
+	#| Tiling Window Management |#
+
+	swap     (multi @ultra tab)
+	close    (multi @ultra .)
+
+	launcher (multi @ultra s)
+
+)
+
+(deflayer ultra
+
+    @reload_rc    XX        2         3         4         5         6         7         8         9         0         -         @main_L   @close
+
+	@swap     @code     @browser  @notes    @config   t         y         u         i         o         p         [         ]         enter
+	@launcher @agent    @music    @notes    @terminal @git      h         @next     k         l         ;         @close    \
+	lsft      Backquote z         x         c         v         b         n         m         ,         @close    /                   rsft
+
+		  lctl   lalt         enter                       @swap                          enter     ralt
+
+
+)
+
 (deflayer navigation
 
-	grv       1         2         3         4         5         6         7         @zoom_out @zoom_in  0         -         =         bspc
+	grv       1         2         M-c       4         5         6         7         @zoom_out @zoom_in  0         -         =         bspc
 
-	@copy_all q         @word_nex e         del       t         y         bspc      home      end       p         [         ]         enter
-	caps      @copy_all @word_bsp @word_del del       g         left      down      up        right     enter     @vim_save \
-	lsft      lsgt      z         x         @copy     @paste    @word_bac n         m         @go_back  @go_forw  /                   rsft
+	@copy_all @del_all  @word_nex M-c       M-v       t         y         bspc      home      end       p         bspc      ]         enter
+	@vim_zq   @copy_all @word_bsp @word_del del       g         left      down      up        right     enter     @vim_save \
+	lsft      lsgt      @vim_zq   x         @copy     @paste    @word_bac n         m         @go_back  @go_forw  /                   rsft
 
-		  lctl   lalt         enter                        spc                            rmet       ralt
+		 lctl   lalt          @vim_zz                          spc                            rmet       ralt
 
 )
 
@@ -151,13 +220,12 @@
 	grv       1         2         3         4         5         6         7         8         9         0         -         =         bspc
 
 	0         S-6       [         ]         S-4       t         y         u         S-8       \         p         [         ]         enter
-	S-2       @{        @lp       @rp       @}        g         @|        S--       -         S-=       =         '         \
+	S-2       @{        @lp       @rp       @}        g         @|        S--       -         S-=       =         $Dquote   \
 	lsft      lsgt      z         S-,       S-.       v         b         S-3       m         ,         .         @%                  rsft
 
-                  lctl   lalt         enter                        spc                            rmet       ralt
+    lctl   lalt         enter                        spc                            rmet       ralt
 
 )
-
 
 (deflayer media
 
@@ -167,19 +235,68 @@
 	XX        a         s         d         f         g         @med_pre  vold      volu      @med_nex  '         '         \
 	lsft      lsgt      z         x         c         v         b         n         mute      ,         .         /                   rsft
 
-		  lctl   lalt         enter                        pp                            rmet       ralt
+		  lctl   lalt       enter                          pp                            rmet       ralt
 
 )
 
-( deflayer numbers
+(deflayer numbers_flat
 
-IntlBackslash   1         2         3         4         5         6         7         8         9         0         -         =         bspc
+IntlBackslash 1         2         3         4         5         6         7         8         9         0         -         =         bspc
 
-	tab       q         w         e         r         t         y         7         8         9         @0_index  bspc      ]         enter
-	caps      a         s         d         f         g         h         4         5         6         0       '         \
+	0         q         3         5         3         t         y         bspc      bspc      6         8         bspc      ]         enter
+    @to_line  1         2         3         4         5         6         7         8         9         0         0         spc
+	lsft      Backquote z         x         c         v         b         0         1         ,         .         .                   rsft
+
+		  lctl   lalt       enter                          spc                            rmet       ralt
+
+
+)
+
+(deflayer compound_symbols
+
+	0         1         2         3         4         5         6         7         8         9         0         -         =         bspc
+
+	tab       q         w         5         r         -         y         XX        5         8         bspc      bspc      ]         enter
+	caps      1         2         3         4         5         6         7         8         9         0         ret       \
 	lsft      Backquote z         x         c         v         b         0         1         2         3         /                   rsft
 
-		  lctl   lalt         enter                        spc                            rmet       ralt
+		  lctl   lalt       enter                          spc                            rmet       ralt
 
+)
+
+(deflayer numbers
+
+	0         1         2         3         4         5         6         7         8         9         0         -         =         bspc
+
+	tab       q         w         5         r         -         y         XX        5         8         bspc      bspc      ]         enter
+	caps      1         2         3         4         5         6         7         8         9         0         ret       \
+	lsft      Backquote z         x         c         v         b         0         1         2         3         /                   rsft
+
+		  lctl   lalt       enter                          spc                            rmet       ralt
+
+
+)
+
+(deflayer edit
+
+IntlBackslash 1         2         3         4         5         6         7         8         9         0         -         =         bspc
+
+	tab       q         w         e         r         t         y         @wbspc    @wbspc    @wbspc    @wbspc    @wbspc    ]         enter
+	caps      a         s         d         f         g         h         S-]       S-[       @wbspc    @wbspc    '         \
+	lsft      `         z         x         c         v         b         n         m         ,         .         /                   rsft
+
+		  lctl   lalt       lmet                           rpt-any                            rmet       ralt
+
+)
+
+(deflayer leader
+
+IntlBackslash 1         2         3         4         5         6         7         8         9         0         -         @main_L   bspc
+
+	tab       q         w         e         r         t         y         u         i         o         p         sldr      ]         enter
+	caps      a         s         d         f         g         h         j         k         l         ;         '         \
+	lsft      Backquote z         x         c         v         b         n         m         ,         .         /                   rsft
+
+		  lctl   lalt         enter                        spc                            rmet       ralt
 
 )
